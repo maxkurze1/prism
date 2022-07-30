@@ -98,7 +98,7 @@ import java.util.ListIterator;
  * For copying, it provides the methods {@link DeepCopy#copy} and {@link DeepCopy#copyAll} and relies
  * on {@link ASTElement#deepCopy(DeepCopy)}.
  */
-public class DeepCopy extends DAGVisitor
+public class DeepCopy extends DeDupVisitor
 {
 	/**
 	 * Copy an ASTElement or null.
