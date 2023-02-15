@@ -254,9 +254,9 @@ public class TransitionList<Value>
 	 * Format is: x'=1, y'=0, with empty string for empty update.
 	 * Only variables updated are included in list (even if unchanged).
 	 */
-	public String getTransitionUpdateString(int index, State currentState) throws PrismLangException
+	public String getTransitionUpdateString(int index, EvaluateContextState context) throws PrismLangException
 	{
-		return getChoiceOfTransition(index).getUpdateString(transitionOffsets.get(index), currentState);
+		return getChoiceOfTransition(index).getUpdateString(transitionOffsets.get(index), context);
 	}
 
 	/**

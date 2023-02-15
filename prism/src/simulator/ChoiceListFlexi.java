@@ -29,6 +29,7 @@ package simulator;
 import java.util.ArrayList;
 import java.util.List;
 
+import parser.EvaluateContextState;
 import parser.State;
 import parser.VarList;
 import parser.ast.Command;
@@ -216,7 +217,7 @@ public class ChoiceListFlexi<Value> implements Choice<Value>
 	}
 
 	@Override
-	public String getUpdateString(int i, State currentState) throws PrismLangException
+	public String getUpdateString(int i, EvaluateContextState currentContext) throws PrismLangException
 	{
 		int j, n;
 		String s = "";
@@ -228,7 +229,7 @@ public class ChoiceListFlexi<Value> implements Choice<Value>
 					first = false;
 				else
 					s += ", ";
-				s += up.getVar(j) + "'=" + up.getExpression(j).evaluate(currentState);
+				s += up.getVar(j) + "'=" + up.getExpression(j).evaluate(currentContext);
 			}
 		}
 		return s;

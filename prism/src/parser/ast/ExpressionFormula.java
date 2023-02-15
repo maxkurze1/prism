@@ -95,7 +95,7 @@ public class ExpressionFormula extends Expression
 		if (definition == null)
 			throw new PrismLangException("Could not evaluate formula", this);
 		else
-			return definition.evaluate(ec);
+			return definition.evaluateMemoized(ec);
 	}
 
 	@Override

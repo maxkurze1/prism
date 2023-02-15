@@ -182,7 +182,7 @@ public class ExpressionFunc extends Expression
 			int n = getNumOperands();
 			Object[] eval = new Object[n];
 			for (int i = 0; i < n; i++) {
-				eval[i] = getOperand(i).evaluate(ec);
+				eval[i] = getOperand(i).evaluateMemoized(ec);
 			}
 			return apply(eval, ec.getEvaluationMode());
 		} catch (PrismLangException e) {

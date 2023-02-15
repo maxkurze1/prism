@@ -11,6 +11,7 @@ import param.Function;
 import param.FunctionFactory;
 import parser.EvaluateContext;
 import parser.EvaluateContextState;
+import parser.EvaluateContextStateCached;
 import parser.State;
 import parser.Values;
 import parser.VarList;
@@ -62,7 +63,6 @@ public class ModulesFileModelGenerator<Value> implements ModelGenerator<Value>, 
 	
 	// State currently being explored
 	protected State exploreState;
-	
 	// Updater object for model
 	protected Updater<Value> updater;
 	// List of currently available transitions
@@ -437,7 +437,7 @@ public class ModulesFileModelGenerator<Value> implements ModelGenerator<Value>, 
 			Expression init = modulesFile.getInitialStates();
 			List<State> allPossStates = varList.getAllStates();
 			for (State possState : allPossStates) {
-				if (init.evaluateBoolean(ec.setState(possState))) {
+				if (init.evaluateBoolean(ec.setLabelValues(labelsCache.getLabelValues(possState)).setState(possState))) {
 					initStates.add(possState);
 				}
 			}
@@ -593,7 +593,7 @@ public class ModulesFileModelGenerator<Value> implements ModelGenerator<Value>, 
 	public String getTransitionUpdateString(int i, int offset) throws PrismException
 	{
 		TransitionList<?> transitions = getTransitionList();
-		return transitions.getTransitionUpdateString(transitions.getTotalIndexOfTransition(i, offset), exploreState);
+		return transitions.getTransitionUpdateString(transitions.getTotalIndexOfTransition(i, offset), ec.setLabelValues(labelsCache.getLabelValues(exploreState)).setState(exploreState));
 	}
 	
 	@Override
@@ -645,9 +645,9 @@ public class ModulesFileModelGenerator<Value> implements ModelGenerator<Value>, 
 				stateNoClocks.varValues[v] = null;
 			}
 		}
-		return (Expression) invariant.deepCopy().evaluatePartially(ec.setState(stateNoClocks)).simplify();
+		return (Expression) invariant.deepCopy().evaluatePartially(ec.setLabelValues(null).setState(stateNoClocks)).simplify();
 	}
-	
+
 	@Override
 	public State getObservation(State state) throws PrismException
 	{
@@ -657,7 +657,7 @@ public class ModulesFileModelGenerator<Value> implements ModelGenerator<Value>, 
 		int numObservables = getNumObservables();
 		State sObs = new State(numObservables);
 		for (int i = 0; i < numObservables; i++) {
-			Object oObs = modulesFile.getObservable(i).getDefinition().evaluate(ec.setState(state));
+			Object oObs = modulesFile.getObservable(i).getDefinition().evaluate(ec.setLabelValues(null).setState(state));
 			sObs.setValue(i, oObs);
 		}
 		return sObs;
@@ -698,7 +698,7 @@ public class ModulesFileModelGenerator<Value> implements ModelGenerator<Value>, 
 		for (int i = 0; i < n; i++) {
 			if (!rewStr.getRewardStructItem(i).isTransitionReward()) {
 				Expression guard = rewStr.getStates(i);
-				boolean guardSat = guard.evaluateBoolean(ec.setState(state));
+				boolean guardSat = guard.evaluateBoolean(ec.setLabelValues(null).setState(state));
 				if (guardSat) {
 					Value rew = eval.evaluate(rewStr.getReward(i), modulesFile.getConstantValues(), state);
 					// Check reward is finite/non-negative (would be checked at model construction time,
@@ -728,7 +728,7 @@ public class ModulesFileModelGenerator<Value> implements ModelGenerator<Value>, 
 				Expression guard = rewStr.getStates(i);
 				String cmdAction = rewStr.getSynch(i);
 				if (action == null ? (cmdAction.isEmpty()) : action.equals(cmdAction)) {
-					boolean guardSat = guard.evaluateBoolean(ec.setState(state));
+					boolean guardSat = guard.evaluateBoolean(ec.setLabelValues(null).setState(state));
 					if (guardSat) {
 						Value rew = eval.evaluate(rewStr.getReward(i), modulesFile.getConstantValues(), state);
 						// Check reward is finite/non-negative (would be checked at model construction time,
@@ -768,7 +768,7 @@ public class ModulesFileModelGenerator<Value> implements ModelGenerator<Value>, 
 		}
 		// Compute the current transition list, if required
 		if (!transitionListBuilt) {
-			updater.calculateTransitions(exploreState, getLabelValues(exploreState) ,transitionList);
+			updater.calculateTransitions(ec.setLabelValues(labelsCache.getLabelValues(exploreState)).setState(exploreState), transitionList);
 			transitionListBuilt = true;
 		}
 		return transitionList;
@@ -784,7 +784,7 @@ public class ModulesFileModelGenerator<Value> implements ModelGenerator<Value>, 
 		}
 		// Compute the current transition list, if required
 		if (!transitionListBuilt) {
-			updaterInt.calculateTransitions(exploreState, getLabelValues(exploreState),transitionListInt);
+			updaterInt.calculateTransitions(ec.setLabelValues(labelsCache.getLabelValues(exploreState)).setState(exploreState),transitionListInt);
 			transitionListIntBuilt = true;
 		}
 		return transitionListInt;

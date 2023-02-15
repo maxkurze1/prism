@@ -121,7 +121,7 @@ public class ExpressionUnaryOp extends Expression
 	@Override
 	public Object evaluate(EvaluateContext ec) throws PrismLangException
 	{
-		Object eval = operand.evaluate(ec);
+		Object eval = operand.evaluateMemoized(ec);
 		return apply(eval, ec.getEvaluationMode());
 	}
 

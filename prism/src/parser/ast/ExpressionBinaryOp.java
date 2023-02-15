@@ -150,18 +150,18 @@ public class ExpressionBinaryOp extends Expression
 	@Override
 	public Object evaluate(EvaluateContext ec) throws PrismLangException
 	{
-		Object eval1 = operand1.evaluate(ec);
+		Object eval1 = operand1.evaluateMemoized(ec);
 		switch (op) {
 			// Short-circuit evaluation
 			case IMPLIES:
-				return !((boolean) eval1) || ((boolean) operand2.evaluate(ec));
+				return !((boolean) eval1) || ((boolean) operand2.evaluateMemoized(ec));
 			case OR:
-				return ((boolean) eval1) || ((boolean) operand2.evaluate(ec));
+				return ((boolean) eval1) || ((boolean) operand2.evaluateMemoized(ec));
 			case AND:
-				return ((boolean) eval1) && ((boolean) operand2.evaluate(ec));
+				return ((boolean) eval1) && ((boolean) operand2.evaluateMemoized(ec));
 			// No short-circuit evaluation
 			default:
-				Object eval2 = operand2.evaluate(ec);
+				Object eval2 = operand2.evaluateMemoized(ec);
 				return apply(eval1, eval2, ec.getEvaluationMode());
 		}
 	}

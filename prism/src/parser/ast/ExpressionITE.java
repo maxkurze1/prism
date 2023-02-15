@@ -101,9 +101,9 @@ public class ExpressionITE extends Expression
 	public Object evaluate(EvaluateContext ec) throws PrismLangException
 	{
 		// Note that we don't use apply(...) because we want short-circuiting
-		Object eval1 = operand1.evaluate(ec);
+		Object eval1 = operand1.evaluateMemoized(ec);
 		boolean b = TypeBool.getInstance().castValueTo(eval1);
-		return getType().castValueTo(b ? operand2.evaluate(ec) : operand3.evaluate(ec), ec.getEvaluationMode());
+		return getType().castValueTo(b ? operand2.evaluateMemoized(ec) : operand3.evaluateMemoized(ec), ec.getEvaluationMode());
 	}
 
 	/**

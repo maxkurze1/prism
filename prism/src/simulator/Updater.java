@@ -163,10 +163,10 @@ public class Updater<Value> extends PrismComponent
 
 	/**
 	 * Determine the set of outgoing transitions from state 'state' and store in 'transitionList'.
-	 * @param state State from which to explore
+	 * @param context Context of state from which to explore
 	 * @param transitionList TransitionList object in which to store result
 	 */
-	public void calculateTransitions(State state, Predicate<String> labelValues, TransitionList<Value> transitionList) throws PrismException
+	public void calculateTransitions(EvaluateContextState context, TransitionList<Value> transitionList) throws PrismException
 	{
 		List<ChoiceListFlexi<Value>> chs;
 		int i, j, k, l, n, count;
@@ -187,14 +187,14 @@ public class Updater<Value> extends PrismComponent
 		// Calculate the available updates for each module/action
 		// (update information in updateLists, clockGuards, enabledSynchs and enabledModules)
 		for (i = 0; i < numModules; i++) {
-			calculateUpdatesForModule(i, state, labelValues);
+			calculateUpdatesForModule(i, context);
 		}
 		//System.out.println("updateLists: " + updateLists);
 
 		// Add independent transitions for each (enabled) module to list
 		for (i = enabledModules[0].nextSetBit(0); i >= 0; i = enabledModules[0].nextSetBit(i + 1)) {
 			for (Updates ups : updateLists.get(i).get(0)) {
-				ChoiceListFlexi<Value> ch = processUpdatesAndCreateNewChoice(-(i + 1), ups, state);
+				ChoiceListFlexi<Value> ch = processUpdatesAndCreateNewChoice(-(i + 1), ups, context.getState());
 				if (ch.size() > 0)
 					transitionList.add(ch);
 			}
@@ -214,7 +214,7 @@ public class Updater<Value> extends PrismComponent
 					Updates ups = updateLists.get(j).get(i).get(0);
 					// Case where this is the first Choice created
 					if (chs.size() == 0) {
-						ChoiceListFlexi<Value> ch = processUpdatesAndCreateNewChoice(i, ups, state);
+						ChoiceListFlexi<Value> ch = processUpdatesAndCreateNewChoice(i, ups, context.getState());
 						if (ch.size() > 0)
 							chs.add(ch);
 					}
@@ -222,7 +222,7 @@ public class Updater<Value> extends PrismComponent
 					else {
 						// Product with all existing choices
 						for (ChoiceListFlexi<Value> ch : chs) {
-							processUpdatesAndAddToProduct(ups, state, ch);
+							processUpdatesAndAddToProduct(ups, context.getState(), ch);
 						}
 					}
 				}
@@ -231,7 +231,7 @@ public class Updater<Value> extends PrismComponent
 					// Case where there are no existing choices
 					if (chs.size() == 0) {
 						for (Updates ups : updateLists.get(j).get(i)) {
-							ChoiceListFlexi<Value> ch = processUpdatesAndCreateNewChoice(i, ups, state);
+							ChoiceListFlexi<Value> ch = processUpdatesAndCreateNewChoice(i, ups, context.getState());
 							if (ch.size() > 0)
 								chs.add(ch);
 						}
@@ -247,7 +247,7 @@ public class Updater<Value> extends PrismComponent
 						for (k = 0; k < count; k++) {
 							Updates ups = updateLists.get(j).get(i).get(k);
 							for (l = 0; l < n; l++) {
-								processUpdatesAndAddToProduct(ups, state, chs.get(k * n + l));
+								processUpdatesAndAddToProduct(ups, context.getState(), chs.get(k * n + l));
 							}
 						}
 					}
@@ -283,9 +283,9 @@ public class Updater<Value> extends PrismComponent
 	 * Determine the enabled updates for the 'm'th module from (global) state 'state'.
 	 * Update information in updateLists, enabledSynchs and enabledModules.
 	 * @param m The module index
-	 * @param state State from which to explore
+	 * @param context The evaluation context of the current state
 	 */
-	protected void calculateUpdatesForModule(int m, State state, Predicate<String> labelValues) throws PrismLangException
+	protected void calculateUpdatesForModule(int m, EvaluateContextState context) throws PrismLangException
 	{
 		Module module = modulesFile.getModule(m);
 		int n = module.getNumCommands();
@@ -296,7 +296,7 @@ public class Updater<Value> extends PrismComponent
 			Expression clockGuard = null;
 			// For real-time models, we only evaluate in terms of non-clock vars, and store any clock guard
 			if (modelType.realTime()) {
-				State stateNoClocks = new State(state);
+				State stateNoClocks = new State(context.getState());
 				for (int v = clockVars.nextSetBit(0); v >= 0; v = clockVars.nextSetBit(v + 1)) {
 					stateNoClocks.varValues[v] = null;
 				}
@@ -306,7 +306,7 @@ public class Updater<Value> extends PrismComponent
 					guardSat = true;
 				}
 			} else {
-				guardSat = command.getGuard().evaluateBoolean(ec.setLabelValues(labelValues).setState(state));
+				guardSat = command.getGuard().evaluateBoolean(context);
 			}
 			// If the command is enabled, update stored info
 			if (guardSat) {

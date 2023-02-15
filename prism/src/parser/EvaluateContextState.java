@@ -40,7 +40,8 @@ public class EvaluateContextState extends EvaluateContext
 	/**
 	 * Variable values for state
 	 */
-	private Object[] varValues;
+	protected State state;
+	protected Object[] varValues;
 
 	/** values of all labels in this state */
 	protected Predicate<String> labelValues;
@@ -66,8 +67,9 @@ public class EvaluateContextState extends EvaluateContext
 	 * Set the state variable values. The array of state values is extracted and stored, not copied.
 	 * Returns a copy of this EvaluateContext to allow chaining of method calls.
 	 */
-	public EvaluateContext setState(State state)
+	public EvaluateContextState setState(State state)
 	{
+		this.state = state;
 		this.varValues = state.varValues;
 		return this;
 	}
@@ -90,5 +92,10 @@ public class EvaluateContextState extends EvaluateContext
 	public Boolean getLabelValue(String name)
 	{
 		return labelValues.test(name);
+	}
+
+	public State getState()
+	{
+		return state;
 	}
 }

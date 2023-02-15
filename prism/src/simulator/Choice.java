@@ -26,6 +26,7 @@
 
 package simulator;
 
+import parser.EvaluateContextState;
 import parser.State;
 import parser.VarList;
 import parser.ast.Expression;
@@ -78,7 +79,7 @@ public interface Choice<Value>
 	 * Format is: x'=1, y'=0, with empty string for empty update.
 	 * Only variables updated are included in list (even if unchanged).
 	 */
-	public String getUpdateString(int i, State currentState) throws PrismLangException;
+	public String getUpdateString(int i, EvaluateContextState currentContext) throws PrismLangException;
 	
 	/**
 	 * Get the updates of the ith transition, as a string.

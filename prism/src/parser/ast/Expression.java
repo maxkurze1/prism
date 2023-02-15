@@ -33,6 +33,7 @@ import parser.EvaluateContext;
 import parser.EvaluateContext.EvalMode;
 import parser.EvaluateContextConstants;
 import parser.EvaluateContextState;
+import parser.EvaluateContextStateCached;
 import parser.EvaluateContextSubstate;
 import parser.EvaluateContextValues;
 import parser.State;
@@ -88,7 +89,7 @@ public abstract class Expression extends ASTElement
 		// Evaluate using a copy of the EvaluateContext
 		// where the evaluation mode is set to EXACT.
 		// Then convert the result to BigRational, regardless of type.
-		return BigRational.from(evaluate(new EvaluateContext()
+		return BigRational.from(evaluateMemoized(new EvaluateContext()
 		{
 			public EvalMode getEvaluationMode()
 			{
@@ -234,6 +235,19 @@ public abstract class Expression extends ASTElement
 		return converter.convert(this);
 	}
 
+	protected Object evaluateMemoized(EvaluateContext ec) throws PrismLangException
+	{
+		if (ec instanceof EvaluateContextStateCached) {
+			EvaluateContextStateCached ecCached = (EvaluateContextStateCached) ec;
+			Object result = ecCached.fetchResult(this);
+			if (result == null) {
+				result = ecCached.storeResult(this, evaluate(ec));
+			}
+			return result;
+		}
+		return evaluate(ec);
+	}
+
 	/**
 	 * Evaluate this expression, using no constant or variable values.
 	 * Note: assumes that type checking has been done already.
@@ -270,7 +284,7 @@ public abstract class Expression extends ASTElement
 	 */
 	public Object evaluate(State state) throws PrismLangException
 	{
-		return evaluate(new EvaluateContextState(state));
+		return evaluateMemoized(new EvaluateContextStateCached(state));
 	}
 
 	/**
@@ -281,7 +295,7 @@ public abstract class Expression extends ASTElement
 	 */
 	public Object evaluate(Values constantValues, State state) throws PrismLangException
 	{
-		return evaluate(new EvaluateContextState(constantValues, state));
+		return evaluateMemoized(new EvaluateContextStateCached(constantValues, state));
 	}
 
 	/**
@@ -317,7 +331,7 @@ public abstract class Expression extends ASTElement
 	 */
 	public int evaluateInt(EvaluateContext ec) throws PrismLangException
 	{
-		return (Integer) TypeInt.getInstance().castValueTo(evaluate(ec), EvalMode.FP);
+		return (Integer) TypeInt.getInstance().castValueTo(evaluateMemoized(ec), EvalMode.FP);
 	}
 
 	/**
@@ -364,7 +378,7 @@ public abstract class Expression extends ASTElement
 	 */
 	public int evaluateInt(State state) throws PrismLangException
 	{
-		return evaluateInt(new EvaluateContextState(state));
+		return evaluateInt(new EvaluateContextStateCached(state));
 	}
 
 	/**
@@ -377,7 +391,7 @@ public abstract class Expression extends ASTElement
 	 */
 	public int evaluateInt(Values constantValues, State state) throws PrismLangException
 	{
-		return evaluateInt(new EvaluateContextState(constantValues, state));
+		return evaluateInt(new EvaluateContextStateCached(constantValues, state));
 	}
 
 	/**
@@ -428,7 +442,7 @@ public abstract class Expression extends ASTElement
 	 */
 	public double evaluateDouble(EvaluateContext ec) throws PrismLangException
 	{
-		return (Double) TypeDouble.getInstance().castValueTo(evaluate(ec), EvalMode.FP);
+		return (Double) TypeDouble.getInstance().castValueTo(evaluateMemoized(ec), EvalMode.FP);
 	}
 
 	/**
@@ -475,7 +489,7 @@ public abstract class Expression extends ASTElement
 	 */
 	public double evaluateDouble(State state) throws PrismLangException
 	{
-		return evaluateDouble(new EvaluateContextState(state));
+		return evaluateDouble(new EvaluateContextStateCached(state));
 	}
 
 	/**
@@ -488,7 +502,7 @@ public abstract class Expression extends ASTElement
 	 */
 	public double evaluateDouble(Values constantValues, State state) throws PrismLangException
 	{
-		return evaluateDouble(new EvaluateContextState(constantValues, state));
+		return evaluateDouble(new EvaluateContextStateCached(constantValues, state));
 	}
 
 	/**
@@ -527,7 +541,7 @@ public abstract class Expression extends ASTElement
 	 */
 	public boolean evaluateBoolean(EvaluateContext ec) throws PrismLangException
 	{
-		return TypeBool.getInstance().castValueTo(evaluate(ec), EvalMode.FP);
+		return TypeBool.getInstance().castValueTo(evaluateMemoized(ec), EvalMode.FP);
 	}
 
 	/**
@@ -570,7 +584,7 @@ public abstract class Expression extends ASTElement
 	 */
 	public boolean evaluateBoolean(State state) throws PrismLangException
 	{
-		return evaluateBoolean(new EvaluateContextState(state));
+		return evaluateBoolean(new EvaluateContextStateCached(state));
 	}
 
 	/**
@@ -582,7 +596,7 @@ public abstract class Expression extends ASTElement
 	 */
 	public boolean evaluateBoolean(Values constantValues, State state) throws PrismLangException
 	{
-		return evaluateBoolean(new EvaluateContextState(constantValues, state));
+		return evaluateBoolean(new EvaluateContextStateCached(constantValues, state));
 	}
 
 	/**
@@ -595,7 +609,7 @@ public abstract class Expression extends ASTElement
 	 */
 	public boolean evaluateBoolean(Values constantValues, Predicate<String> labelValues, State state) throws PrismLangException
 	{
-		return evaluateBoolean(new EvaluateContextState(constantValues, labelValues, state));
+		return evaluateBoolean(new EvaluateContextStateCached(constantValues, labelValues, state));
 	}
 
 	/**
@@ -666,7 +680,7 @@ public abstract class Expression extends ASTElement
 	 */
 	public BigRational evaluateExact(State state) throws PrismLangException
 	{
-		return evaluateExact(new EvaluateContextState(state));
+		return evaluateExact(new EvaluateContextStateCached(state));
 	}
 
 	/**
@@ -678,7 +692,7 @@ public abstract class Expression extends ASTElement
 	 */
 	public BigRational evaluateExact(Values constantValues, State state) throws PrismLangException
 	{
-		return evaluateExact(new EvaluateContextState(constantValues, state));
+		return evaluateExact(new EvaluateContextStateCached(constantValues, state));
 	}
 
 	/**
@@ -691,7 +705,7 @@ public abstract class Expression extends ASTElement
 	 */
 	public BigRational evaluateExact(Values constantValues, Predicate<String> labelValues, State state) throws PrismLangException
 	{
-		return evaluateExact(new EvaluateContextState(constantValues, labelValues, state));
+		return evaluateExact(new EvaluateContextStateCached(constantValues, labelValues, state));
 	}
 
 	/**
