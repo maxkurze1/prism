@@ -87,15 +87,18 @@ import java.util.List;
 import java.util.ListIterator;
 
 /**
- * DeepCopy is a visitor that copies an AST.
- * <p>
- * For copying it provides the methods {@link DeepCopy#copy} and {@link DeepCopy#copyAll} and relies
+ * DeepCopy is a visitor that copies an AST without duplicating nodes.
+ * <br>
+ * After certain replacements, e.g., formula substitution,
+ * the AST becomes a directed acyclic graph.
+ * DeepCopy preserves that structure on copying to prevent
+ * a (potentially exponential) blowup in the number of nodes.
+ * <br>
+ * The implementation uses an equality-based map to identify duplicates.
+ * For copying, it provides the methods {@link DeepCopy#copy} and {@link DeepCopy#copyAll} and relies
  * on {@link ASTElement#deepCopy(DeepCopy)}.
- * </p>
- *
- * @see ASTElement#deepCopy(DeepCopy)
  */
-public class DeepCopy implements ASTVisitor
+public class DeepCopy extends DAGVisitor
 {
 	/**
 	 * Copy an ASTElement or null.
@@ -130,319 +133,319 @@ public class DeepCopy implements ASTVisitor
 	}
 
 	@Override
-	public Object visit(ModulesFile e) throws PrismLangException
+	public Object visitNow(ModulesFile e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(PropertiesFile e) throws PrismLangException
+	public Object visitNow(PropertiesFile e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(Property e) throws PrismLangException
+	public Object visitNow(Property e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(FormulaList e) throws PrismLangException
+	public Object visitNow(FormulaList e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(LabelList e) throws PrismLangException
+	public Object visitNow(LabelList e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(ConstantList e) throws PrismLangException
+	public Object visitNow(ConstantList e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(Declaration e) throws PrismLangException
+	public Object visitNow(Declaration e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(DeclarationInt e) throws PrismLangException
+	public Object visitNow(DeclarationInt e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(DeclarationBool e) throws PrismLangException
+	public Object visitNow(DeclarationBool e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(DeclarationArray e) throws PrismLangException
+	public Object visitNow(DeclarationArray e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(DeclarationClock e) throws PrismLangException
+	public Object visitNow(DeclarationClock e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(DeclarationIntUnbounded e) throws PrismLangException
+	public Object visitNow(DeclarationIntUnbounded e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(Module e) throws PrismLangException
+	public Object visitNow(Module e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(Command e) throws PrismLangException
+	public Object visitNow(Command e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(Updates e) throws PrismLangException
+	public Object visitNow(Updates e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(Update e) throws PrismLangException
+	public Object visitNow(Update e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(UpdateElement e) throws PrismLangException
+	public Object visitNow(UpdateElement e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(RenamedModule e) throws PrismLangException
+	public Object visitNow(RenamedModule e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(RewardStruct e) throws PrismLangException
+	public Object visitNow(RewardStruct e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(RewardStructItem e) throws PrismLangException
+	public Object visitNow(RewardStructItem e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(ObservableVars e) throws PrismLangException
+	public Object visitNow(ObservableVars e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(Observable e) throws PrismLangException
+	public Object visitNow(Observable e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(SystemInterleaved e) throws PrismLangException
+	public Object visitNow(SystemInterleaved e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(SystemFullParallel e) throws PrismLangException
+	public Object visitNow(SystemFullParallel e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(SystemParallel e) throws PrismLangException
+	public Object visitNow(SystemParallel e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(SystemHide e) throws PrismLangException
+	public Object visitNow(SystemHide e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(SystemRename e) throws PrismLangException
+	public Object visitNow(SystemRename e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(SystemModule e) throws PrismLangException
+	public Object visitNow(SystemModule e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(SystemBrackets e) throws PrismLangException
+	public Object visitNow(SystemBrackets e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(SystemReference e) throws PrismLangException
+	public Object visitNow(SystemReference e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(ExpressionTemporal e) throws PrismLangException
+	public Object visitNow(ExpressionTemporal e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(ExpressionITE e) throws PrismLangException
+	public Object visitNow(ExpressionITE e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(ExpressionBinaryOp e) throws PrismLangException
+	public Object visitNow(ExpressionBinaryOp e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(ExpressionUnaryOp e) throws PrismLangException
+	public Object visitNow(ExpressionUnaryOp e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(ExpressionFunc e) throws PrismLangException
+	public Object visitNow(ExpressionFunc e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(ExpressionIdent e) throws PrismLangException
+	public Object visitNow(ExpressionIdent e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(ExpressionLiteral e) throws PrismLangException
+	public Object visitNow(ExpressionLiteral e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(ExpressionConstant e) throws PrismLangException
+	public Object visitNow(ExpressionConstant e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(ExpressionFormula e) throws PrismLangException
+	public Object visitNow(ExpressionFormula e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(ExpressionVar e) throws PrismLangException
+	public Object visitNow(ExpressionVar e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(ExpressionInterval e) throws PrismLangException
+	public Object visitNow(ExpressionInterval e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(ExpressionProb e) throws PrismLangException
+	public Object visitNow(ExpressionProb e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(ExpressionReward e) throws PrismLangException
+	public Object visitNow(ExpressionReward e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(ExpressionSS e) throws PrismLangException
+	public Object visitNow(ExpressionSS e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(ExpressionExists e) throws PrismLangException
+	public Object visitNow(ExpressionExists e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(ExpressionForAll e) throws PrismLangException
+	public Object visitNow(ExpressionForAll e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(ExpressionStrategy e) throws PrismLangException
+	public Object visitNow(ExpressionStrategy e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(ExpressionLabel e) throws PrismLangException
+	public Object visitNow(ExpressionLabel e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(ExpressionObs e) throws PrismLangException
+	public Object visitNow(ExpressionObs e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(ExpressionProp e) throws PrismLangException
+	public Object visitNow(ExpressionProp e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(ExpressionFilter e) throws PrismLangException
+	public Object visitNow(ExpressionFilter e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(Filter e) throws PrismLangException
+	public Object visitNow(Filter e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
 
 	@Override
-	public Object visit(ForLoop e) throws PrismLangException
+	public Object visitNow(ForLoop e) throws PrismLangException
 	{
 		return e.clone().deepCopy(this);
 	}
