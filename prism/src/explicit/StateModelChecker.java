@@ -40,7 +40,10 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
 
+import common.IterableStateSet;
+import common.iterable.FunctionalPrimitiveIterator;
 import parser.EvaluateContext.EvalMode;
+import parser.EvaluateContextFull;
 import parser.State;
 import parser.Values;
 import parser.VarList;
@@ -65,6 +68,7 @@ import parser.ast.LabelList;
 import parser.ast.ModulesFile;
 import parser.ast.PropertiesFile;
 import parser.ast.Property;
+import parser.type.Type;
 import parser.type.TypeBool;
 import parser.type.TypeDouble;
 import parser.type.TypeInt;
@@ -74,7 +78,6 @@ import prism.Accuracy;
 import prism.Filter;
 import prism.ModelInfo;
 import prism.ModelType;
-import prism.OpRelOpBound;
 import prism.Prism;
 import prism.PrismComponent;
 import prism.PrismException;
@@ -84,7 +87,6 @@ import prism.PrismLog;
 import prism.PrismNotSupportedException;
 import prism.PrismSettings;
 import prism.Result;
-import prism.ResultTesting;
 import prism.RewardGenerator;
 
 /**
@@ -609,7 +611,18 @@ public class StateModelChecker extends PrismComponent
 	 */
 	public StateValues checkExpression(Model<?> model, Expression expr, BitSet statesOfInterest) throws PrismException
 	{
-		StateValues res = null;
+		StateValues res;
+
+//		// Optimise for propositions
+		if (expr.isProposition()) {
+			LabelList ll = getLabelList();
+			assert ll != null : "LabelList shouldn't be null to evaluate expressions";
+//			 If all labels values are known, check proposition
+			if (model.getLabels().containsAll(expr.getAllLabels())) {
+				return checkProposition(model, expr, statesOfInterest);
+			}
+			// Otherwise continue with recursive evaluation (slight performance penalty)
+		}
 
 		// If-then-else
 		if (expr instanceof ExpressionITE) {
@@ -676,6 +689,47 @@ public class StateModelChecker extends PrismComponent
 		return res;
 	}
 
+	/**
+	 * Check an expression that is a proposition, i.e., can be evaluated on a single state.
+	 * This approach takes advantage of the caching for {@link Expression#evaluate}.
+	 *
+	 * @param model
+	 * @param expr
+	 * @param statesOfInterest
+	 * @return
+	 * @throws PrismException
+	 */
+	protected StateValues checkProposition(Model model, Expression expr, BitSet statesOfInterest) throws PrismException
+	{
+		if (!expr.isProposition()) {
+			throw new IllegalArgumentException("Expression expected to be a proposition.");
+		}
+
+		Type type = expr.getType();
+		StateValues res = new StateValues(type, model);
+		List<State> statesList = model.getStatesList();
+		FunctionalPrimitiveIterator.OfInt states = new IterableStateSet(statesOfInterest, model.getNumStates()).iterator();
+		if (type instanceof TypeBool) {
+			while(states.hasNext()) {
+				int i = states.nextInt();
+				res.setValue(i, expr.evaluateBoolean(new EvaluateContextFull(constantValues, model.getLabelsOfState(i), statesList.get(i), model.getObservationAsState(i))));
+			}
+		} else if (type instanceof TypeInt) {
+			while(states.hasNext()) {
+				int i = states.nextInt();
+				res.setValue(i, expr.evaluateInt(new EvaluateContextFull(constantValues, model.getLabelsOfState(i), statesList.get(i), model.getObservationAsState(i))));
+			}
+		} else if (type instanceof TypeDouble) {
+			while(states.hasNext()) {
+				int i = states.nextInt();
+				res.setValue(i, expr.evaluateDouble(new EvaluateContextFull(constantValues, model.getLabelsOfState(i), statesList.get(i), model.getObservationAsState(i))));
+			}
+		} else {
+			throw new PrismNotSupportedException("Couldn't check proposition of type " + type);
+		}
+
+		return res;
+	}
 	/**
 	 * Model check a binary operator.
 	 * @param statesOfInterest the states of interest, see checkExpression()

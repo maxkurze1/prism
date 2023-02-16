@@ -26,11 +26,13 @@
 
 package parser;
 
+import java.util.function.Predicate;
+
 /**
  * Information required to evaluate an expression,
  * supporting all aspects defined in {@link EvaluateContext}.
  */
-public class EvaluateContextFull extends EvaluateContextState
+public class EvaluateContextFull extends EvaluateContextStateCached
 {
 	/**
 	 * Observable values
@@ -43,9 +45,14 @@ public class EvaluateContextFull extends EvaluateContextState
 	public EvaluateContextFull(State state, State obs)
 	{
 		super(state);
-		if (obs != null) {
-			setObservation(obs);
-		}
+		setObservation(obs);
+	}
+
+
+	public EvaluateContextFull(Values constantValues, Predicate<String> labelValues, State state, State obs)
+	{
+		super(constantValues, labelValues, state);
+		setObservation(obs);
 	}
 
 	/**
@@ -54,7 +61,9 @@ public class EvaluateContextFull extends EvaluateContextState
 	 */
 	public EvaluateContext setObservation(State obs)
 	{
-		this.obsValues = obs.varValues;
+		if (obs != null) {
+			this.obsValues = obs.varValues;
+		}
 		return this;
 	}
 

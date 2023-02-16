@@ -37,6 +37,7 @@ import java.util.PrimitiveIterator;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.IntPredicate;
+import java.util.function.Predicate;
 
 import common.IteratorTools;
 import explicit.graphviz.Decorator;
@@ -134,7 +135,12 @@ public interface Model<Value>
 	 * Get access to a list of constant values (optionally stored).
 	 */
 	public Values getConstantValues();
-	
+
+	public default State getObservationAsState(int s)
+	{
+		return null;
+	}
+
 	/**
 	 * Get the states that satisfy a label in this model (optionally stored).
 	 * Returns null if there is no label of this name.
@@ -164,6 +170,11 @@ public interface Model<Value>
 			labels.put(name, getLabelStates(name));
 		}
 		return labels;
+	}
+
+	default Predicate<String> getLabelsOfState(int state)
+	{
+		return label -> getLabelStates(label).get(state);
 	}
 	
 	/**
